@@ -1,0 +1,537 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>صندوق التحدي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;700&display=swap">
+<style>
+/* Layout: one centered column, pictures with words, two choices at most, read-aloud on every screen, no timers. */
+:root {
+  --fs: 20px;
+  --bg: #F2F4F1;
+  --surface: #FFFFFF;
+  --fg: #15211F;
+  --muted: #56655F;
+  --line: #D3DAD5;
+  --accent: #0E7C70;
+  --accent-fg: #FFFFFF;
+  --warm: #C8671B;
+  --good: #1E7A3C;
+  --good-soft: #E3F3E8;
+  --bad: #8A5A00;
+  --bad-soft: #FBEFD5;
+  --box: #D98B4A;
+  --box-lid: #B9702F;
+  --hole: #1B2422;
+  --font-display: "Readex Pro", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1715;
+    --surface: #17221F;
+    --fg: #E8EFEC;
+    --muted: #9DB0A9;
+    --line: #2B3B36;
+    --accent: #3CC2B0;
+    --accent-fg: #08201C;
+    --warm: #F0A262;
+    --good: #5CC58A;
+    --good-soft: #1B3427;
+    --bad: #F0C26A;
+    --bad-soft: #3A3018;
+    --box: #B9702F;
+    --box-lid: #8F541F;
+    --hole: #0A100F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1715;
+  --surface: #17221F;
+  --fg: #E8EFEC;
+  --muted: #9DB0A9;
+  --line: #2B3B36;
+  --accent: #3CC2B0;
+  --accent-fg: #08201C;
+  --warm: #F0A262;
+  --good: #5CC58A;
+  --good-soft: #1B3427;
+  --bad: #F0C26A;
+  --bad-soft: #3A3018;
+  --box: #B9702F;
+  --box-lid: #8F541F;
+  --hole: #0A100F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  line-height: 1.8;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; font-size: var(--fs); }
+.wrap.big { --fs: 25px; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.4; }
+h1 { font-size: 1.5em; font-weight: 700; }
+h2 { font-size: 1.25em; font-weight: 700; }
+h2:focus { outline: none; }
+p { margin: 0; }
+.note { font-size: 0.8em; color: var(--muted); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.tool {
+  font: inherit; font-size: 0.75em; cursor: pointer;
+  background: transparent; color: var(--fg); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 14px; min-height: 48px;
+}
+.tool[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.audio-note { font-size: 0.75em; background: var(--bad-soft); border: 1px solid var(--bad); border-radius: 10px; padding: 8px 12px; line-height: 1.7; margin: 0; }
+.tool.replay { background: var(--surface); border-color: var(--accent); }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.stat span { display: block; font-size: 0.7em; color: var(--muted); }
+.stat b { font-family: var(--font-display); font-size: 1.2em; font-variant-numeric: tabular-nums; }
+
+.stage { display: flex; justify-content: center; }
+.stage svg { width: min(100%, 240px); height: auto; }
+.lid { transform-box: fill-box; transform-origin: left bottom; transition: transform 0.5s ease; }
+.lid.open { transform: translateY(-9px) rotate(-6deg); }
+
+.screen { display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+
+.btn {
+  font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--accent); color: var(--accent-fg);
+  border: 1px solid var(--accent); border-radius: 12px;
+  padding: 14px 24px; min-height: 64px; align-self: flex-start;
+}
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.btn.wide { align-self: stretch; text-align: center; }
+.btn:hover { filter: brightness(1.06); }
+button:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; }
+
+.scale { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.scale button {
+  font: inherit; cursor: pointer; color: var(--fg); min-width: 0; min-height: 130px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 14px;
+  padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+}
+.scale button:hover { border-color: var(--accent); }
+.scale svg { width: 56px; height: 56px; }
+.scale .lbl { font-weight: 600; font-size: 0.85em; line-height: 1.4; }
+
+.clues { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.clues li { display: flex; gap: 10px; align-items: baseline; }
+.clues li::before { content: ""; flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--warm); }
+
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.options button {
+  font: inherit; font-weight: 600; cursor: pointer; color: var(--fg); min-height: 150px; min-width: 0;
+  background: var(--surface); border: 3px solid var(--line); border-radius: 14px; padding: 12px 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.options svg { width: 72px; height: 72px; }
+.options button:hover:not(:disabled) { border-color: var(--accent); }
+.options button:disabled { cursor: default; }
+.options button.ok { background: var(--good-soft); border-color: var(--good); }
+.options button.no { background: var(--bad-soft); border-color: var(--bad); opacity: 0.7; }
+.feedback { font-weight: 600; }
+.feedback.ok { color: var(--good); }
+
+.big-icon { display: flex; justify-content: center; }
+.big-icon svg { width: 110px; height: 110px; }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; text-align: center; }
+.compare div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.compare svg { width: 56px; height: 56px; }
+.compare small { color: var(--muted); font-size: 0.75em; }
+.compare b { font-weight: 600; font-size: 0.9em; }
+
+.lesson { border-inline-start: 5px solid var(--accent); }
+.round-row { display: flex; align-items: center; gap: 12px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.round-row:last-child { border-bottom: 0; }
+.round-row svg { width: 44px; height: 44px; flex: none; }
+.round-row div { display: flex; flex-direction: column; min-width: 0; }
+.round-row span { color: var(--muted); font-size: 0.8em; }
+.starline { font-size: 1.6em; color: #D9A400; letter-spacing: 0.1em; }
+
+@media (max-width: 420px) { h1 { font-size: 1.35em; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap" id="wrap" dir="rtl" lang="ar">
+  <header class="screen" style="gap:10px">
+    <h1>صندوق التحدي</h1>
+    <div class="tools">
+      <button class="tool" id="btnSize" type="button" aria-pressed="false">تكبير الخط</button>
+      <button class="tool" id="btnSound" type="button" aria-pressed="true">الصوت: يعمل</button>
+      <button class="tool replay" id="btnReplay" type="button">اسمعي مرة أخرى</button>
+    </div>
+    <p class="audio-note" id="audioNote" role="status" hidden></p>
+  </header>
+
+  <div class="stats" id="stats" hidden>
+    <div class="stat"><span>الجولة</span><b id="stRound">١/٣</b></div>
+    <div class="stat"><span>النجوم</span><b id="stStars">٠</b></div>
+  </div>
+
+  <div class="stage" id="stage" aria-hidden="true">
+    <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="30" y="52" width="140" height="80" rx="6" fill="var(--box)"/>
+      <ellipse cx="100" cy="96" rx="36" ry="27" fill="var(--hole)"/>
+      <text x="100" y="106" text-anchor="middle" font-size="30" font-weight="700" fill="var(--warm)" font-family="Readex Pro, sans-serif">؟</text>
+      <g class="lid" id="lid"><rect x="24" y="34" width="152" height="22" rx="5" fill="var(--box-lid)"/></g>
+    </svg>
+  </div>
+
+  <section class="screen" id="s-start">
+    <h2 class="sp" tabindex="-1">هل تدخلين يدك في الصندوق؟</h2>
+    <div class="card">
+      <p class="sp">في الصندوق شيء مخفي. تلمسينه وتخمّنين ما هو.</p>
+      <p class="sp" style="margin-top:8px">لا يوجد وقت محدد. وإذا لم تريدي، تقدرين أن تتخطي.</p>
+    </div>
+    <button class="btn" id="btnStart" type="button">ابدئي اللعب</button>
+  </section>
+
+  <section class="screen" id="s-expect" hidden>
+    <h2 class="sp" tabindex="-1">هل تخافين من لمس الشيء؟</h2>
+    <div class="scale" id="scaleExpect"></div>
+    <button class="btn ghost" id="btnSkip" type="button">لا أريد هذه اللمسة</button>
+  </section>
+
+  <section class="screen" id="s-reach" hidden>
+    <h2 class="sp" tabindex="-1" id="reachTitle">ادخلي يدك</h2>
+    <div id="holdPhase" class="screen">
+      <p class="sp">اضغطي الزر عندما تكونين جاهزة.</p>
+      <button class="btn wide" id="btnReach" type="button">أدخل يدي</button>
+    </div>
+    <div id="guessPhase" class="screen" hidden>
+      <div class="card">
+        <ul class="clues" id="clues"></ul>
+        <button class="btn ghost" id="btnClue" type="button" style="margin-top:14px">تلميح آخر</button>
+      </div>
+      <p class="sp" style="font-weight:600">ماذا تلمسين؟</p>
+      <div class="options" id="options"></div>
+      <p class="feedback sp" id="feedback"></p>
+      <button class="btn" id="btnAfterGuess" type="button" hidden>متابعة</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-actual" hidden>
+    <h2 class="sp" tabindex="-1">هل كان الأمر صعباً؟</h2>
+    <div class="scale" id="scaleActual"></div>
+  </section>
+
+  <section class="screen" id="s-result" hidden>
+    <div class="big-icon" id="resultIcon" aria-hidden="true"></div>
+    <h2 class="sp" tabindex="-1" id="resultTitle"></h2>
+    <p class="sp" id="resultGap"></p>
+    <div class="compare" id="resultCompare"></div>
+    <div class="card lesson"><p class="sp" id="resultLesson"></p></div>
+    <button class="btn" id="btnNext" type="button"></button>
+  </section>
+
+  <section class="screen" id="s-end" hidden>
+    <h2 class="sp" tabindex="-1">أحسنتِ! انتهت اللعبة</h2>
+    <div class="card"><p>نجومك</p><div class="starline" id="endStars" aria-hidden="true"></div><p class="sp" id="endStarsText"></p></div>
+    <div class="card lesson"><p class="sp" id="endMessage"></p></div>
+    <div class="card" id="endRounds"></div>
+    <button class="btn" id="btnAgain" type="button">العبي مرة أخرى</button>
+  </section>
+</div>
+
+<script>
+(function () {
+  var ITEMS = [
+    { name: "ثلج", clues: ["بارد جداً", "صلب وأملس", "يذوب في يدك"], wrong: "إسفنجة",
+      lesson: "الشعور الصعب يمرّ بسرعة. جسمك يتعوّد." },
+    { name: "إسفنجة", clues: ["ناعمة ورخوة", "فيها ماء", "خفيفة"], wrong: "معجون",
+      lesson: "الشيء المجهول يبدو أصعب قبل أن نلمسه." },
+    { name: "معجون", clues: ["طري", "نشكّله بأيدينا", "يلتصق قليلاً"], wrong: "أرز",
+      lesson: "لما نجرّب، يختفي الخوف." },
+    { name: "أرز", clues: ["حبات صغيرة", "تنزلق بين الأصابع", "جاف وخفيف"], wrong: "هلام",
+      lesson: "لما نصبر قليلاً نكتشف أشياء جديدة." },
+    { name: "هلام", clues: ["لزج وبارد", "يهتز", "ينزلق من اليد"], wrong: "صنفرة",
+      lesson: "أصعب شيء هو البداية. بعدها يصير أسهل." },
+    { name: "صنفرة", clues: ["خشنة", "رقيقة ومسطحة", "فيها حبيبات صغيرة"], wrong: "إسفنجة",
+      lesson: "الشيء غير المريح ليس مؤلماً دائماً." }
+  ];
+  var LBL_E = ["", "لا أخاف", "قليلاً", "أخاف"];
+  var LBL_A = ["", "كان سهلاً", "كان عادياً", "كان صعباً"];
+  var ROUNDS = 3;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (x) { return Number(x).toLocaleString("ar-EG"); };
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function face(m) {
+    var mouth = m === 1 ? "M14 29 Q24 39 34 29" : (m === 2 ? "M15 32 L33 32" : "M14 35 Q24 27 34 35");
+    return '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="none" stroke="var(--accent)" stroke-width="3"/>' +
+      '<circle cx="17" cy="20" r="2.6" fill="var(--fg)"/><circle cx="31" cy="20" r="2.6" fill="var(--fg)"/>' +
+      '<path d="' + mouth + '" fill="none" stroke="var(--fg)" stroke-width="3" stroke-linecap="round"/></svg>';
+  }
+  var ST = 'stroke="var(--fg)" stroke-width="2.5" stroke-linejoin="round"';
+  var ICONS = {
+    "ثلج": '<rect x="12" y="14" width="40" height="38" rx="8" fill="#BFE6F5" ' + ST + '/><path d="M20 25 L30 22" stroke="#fff" stroke-width="4" stroke-linecap="round"/>',
+    "إسفنجة": '<rect x="9" y="18" width="46" height="30" rx="8" fill="#F2C94C" ' + ST + '/><circle cx="22" cy="28" r="3" fill="#C9A227"/><circle cx="36" cy="35" r="4" fill="#C9A227"/><circle cx="45" cy="26" r="2.5" fill="#C9A227"/><circle cx="25" cy="40" r="2.5" fill="#C9A227"/>',
+    "معجون": '<path d="M12 40 Q10 22 28 20 Q50 16 52 34 Q54 50 34 50 Q16 54 12 40 Z" fill="#E86F8E" ' + ST + '/>',
+    "أرز": '<g fill="#FFFFFF" stroke="var(--fg)" stroke-width="1.8"><ellipse cx="20" cy="26" rx="6" ry="3" transform="rotate(-20 20 26)"/><ellipse cx="34" cy="22" rx="6" ry="3" transform="rotate(15 34 22)"/><ellipse cx="46" cy="30" rx="6" ry="3" transform="rotate(-10 46 30)"/><ellipse cx="26" cy="38" rx="6" ry="3" transform="rotate(25 26 38)"/><ellipse cx="40" cy="42" rx="6" ry="3" transform="rotate(-25 40 42)"/><ellipse cx="16" cy="44" rx="6" ry="3" transform="rotate(5 16 44)"/></g>',
+    "هلام": '<path d="M14 50 L20 22 Q32 14 44 22 L50 50 Z" fill="#E5484D" fill-opacity="0.85" ' + ST + '/><path d="M24 26 L22 40" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>',
+    "صنفرة": '<rect x="9" y="18" width="46" height="30" rx="3" fill="#C79A5E" ' + ST + '/><g fill="#7A5A2E"><circle cx="18" cy="26" r="1.6"/><circle cx="30" cy="24" r="1.6"/><circle cx="43" cy="28" r="1.6"/><circle cx="24" cy="36" r="1.6"/><circle cx="37" cy="38" r="1.6"/><circle cx="47" cy="40" r="1.6"/><circle cx="16" cy="42" r="1.6"/></g>'
+  };
+  function icon(name) { return '<svg viewBox="0 0 64 64" aria-hidden="true">' + ICONS[name] + "</svg>"; }
+
+  /* read aloud */
+  var synth = window.speechSynthesis, soundOn = true, lastText = "", cur = "s-start";
+  function arVoice() {
+    if (!synth) return null;
+    var v = synth.getVoices();
+    for (var i = 0; i < v.length; i++) { if (/^ar/i.test(v[i].lang)) return v[i]; }
+    return null;
+  }
+  function audioOK() { return !!synth; }
+  function showAudioNote(msg) { var n = $("audioNote"); n.textContent = msg; n.hidden = !msg; }
+  function failNote() {
+    showAudioNote(arVoice()
+      ? "الصوت لم يعمل. ارفعي صوت الجهاز وتأكدي أنه ليس صامتاً، ثم اضغطي «اسمعي مرة أخرى»."
+      : "جهازك ليس فيه صوت عربي للقراءة. جرّبي متصفح Chrome، أو أضيفي اللغة العربية من إعدادات الصوت في الجهاز.");
+  }
+  function speak(t, explicit) {
+    if (!synth || !t) {
+      if (explicit) showAudioNote("هذا المتصفح لا يدعم القراءة بصوت عالٍ. جرّبي متصفح Chrome أو Safari.");
+      return;
+    }
+    try {
+      var started = false;
+      if (synth.speaking || synth.pending) synth.cancel();
+      synth.resume();
+      var u = new SpeechSynthesisUtterance(t);
+      u.lang = "ar-SA"; var v = arVoice(); if (v) u.voice = v;
+      u.rate = 0.85; u.volume = 1;
+      u.onstart = function () { started = true; showAudioNote(""); };
+      u.onerror = function () { if (!started) failNote(); };
+      synth.speak(u);
+      setTimeout(function () { if (!started && !synth.speaking) failNote(); }, 2500);
+    } catch (e) { failNote(); }
+  }
+  function say(t) { lastText = t; if (soundOn) speak(t); }
+  function visibleText(id) {
+    var out = [];
+    Array.prototype.forEach.call($(id).querySelectorAll(".sp"), function (e) {
+      if (e.offsetParent !== null && e.textContent.trim()) out.push(e.textContent.trim());
+    });
+    return out.join(". ");
+  }
+  function sayScreen(id) { setTimeout(function () { say(visibleText(id)); }, 80); }
+  function refreshAudioUI() {
+    var ok = !!synth;
+    $("btnSound").hidden = !ok; $("btnReplay").hidden = !ok;
+    if (!ok) showAudioNote("هذا المتصفح لا يدعم القراءة بصوت عالٍ.");
+  }
+  refreshAudioUI();
+  if (synth) {
+    try { synth.getVoices(); } catch (e) {}
+    if (synth.addEventListener) synth.addEventListener("voiceschanged", function () { try { synth.getVoices(); } catch (e) {} });
+    document.addEventListener("pointerdown", function unlock() {
+      document.removeEventListener("pointerdown", unlock);
+      try { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } catch (e) {}
+    });
+  }
+
+  var screens = ["s-start", "s-expect", "s-reach", "s-actual", "s-result", "s-end"];
+  var withStage = { "s-start": 1, "s-expect": 1, "s-reach": 1 };
+  var S;
+
+  function show(id) {
+    cur = id;
+    screens.forEach(function (s) { $(s).hidden = s !== id; });
+    $("stage").hidden = !withStage[id];
+    $("stats").hidden = id === "s-start" || id === "s-end";
+    var h = $(id).querySelector("h2");
+    if (h) { try { h.focus({ preventScroll: true }); } catch (e) {} }
+    window.scrollTo(0, 0);
+    sayScreen(id);
+  }
+  function stats() {
+    $("stRound").textContent = fmt(Math.min(S.i + 1, ROUNDS)) + "/" + fmt(ROUNDS);
+    $("stStars").textContent = fmt(S.stars);
+  }
+  function buildScale(id, labels, onPick) {
+    var box = $(id); box.innerHTML = "";
+    [1, 2, 3].forEach(function (k) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = face(k) + '<span class="lbl sp">' + labels[k] + "</span>";
+      b.addEventListener("click", function () { onPick(k); });
+      box.appendChild(b);
+    });
+  }
+
+  function newGame() {
+    S = { items: shuffle(ITEMS).slice(0, ROUNDS), i: 0, stars: 0, rounds: [], clues: 1, expected: 0, answered: false, tries: 0, reaching: false };
+    startRound();
+  }
+  function startRound() {
+    S.clues = 1; S.expected = 0; S.answered = false; S.tries = 0; S.reaching = false;
+    $("lid").classList.remove("open");
+    $("holdPhase").hidden = false;
+    $("guessPhase").hidden = true;
+    $("btnAfterGuess").hidden = true;
+    $("feedback").textContent = ""; $("feedback").className = "feedback sp";
+    $("reachTitle").textContent = "ادخلي يدك";
+    stats();
+    show("s-expect");
+  }
+
+  function reachDone() {
+    $("holdPhase").hidden = true;
+    $("guessPhase").hidden = false;
+    $("reachTitle").textContent = "يدك في الداخل";
+    renderClues(); renderOptions();
+    sayScreen("s-reach");
+  }
+  function renderClues() {
+    var item = S.items[S.i], ul = $("clues"); ul.innerHTML = "";
+    for (var k = 0; k < S.clues; k++) {
+      var li = document.createElement("li"); li.className = "sp"; li.textContent = item.clues[k]; ul.appendChild(li);
+    }
+    $("btnClue").hidden = S.clues >= item.clues.length || S.answered;
+  }
+  function renderOptions() {
+    var item = S.items[S.i], box = $("options"); box.innerHTML = "";
+    shuffle([item.name, item.wrong]).forEach(function (name) {
+      var b = document.createElement("button");
+      b.type = "button"; b.dataset.name = name;
+      b.innerHTML = icon(name) + '<span class="sp">' + name + "</span>";
+      b.addEventListener("click", function () { pick(b, name); });
+      box.appendChild(b);
+    });
+  }
+  function pick(btn, name) {
+    if (S.answered) return;
+    var item = S.items[S.i], fb = $("feedback");
+    S.tries++;
+    if (name !== item.name) {
+      btn.disabled = true; btn.classList.add("no");
+      fb.className = "feedback sp";
+      fb.textContent = "قريب! جرّبي الثاني.";
+      say(fb.textContent);
+      return;
+    }
+    S.answered = true;
+    S.stars += S.tries === 1 ? 2 : 1;
+    Array.prototype.forEach.call($("options").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.name === item.name) b.classList.add("ok");
+    });
+    fb.className = "feedback ok sp";
+    fb.textContent = "أحسنتِ! كان " + item.name + ".";
+    say(fb.textContent);
+    $("btnAfterGuess").hidden = false;
+    $("btnClue").hidden = true;
+    stats();
+  }
+
+  function gapText(exp, act) {
+    if (exp > act) return "كنتِ خائفة، وكان الأمر أسهل! أحسنتِ.";
+    if (exp === act) return "عرفتِ شعورك جيداً. أحسنتِ.";
+    return "كان أصعب قليلاً، ومع ذلك جرّبتِ. أنتِ شجاعة.";
+  }
+  function nextLabel() { return S.i === ROUNDS - 1 ? "النتيجة" : "الجولة التالية"; }
+
+  function showResult(actual) {
+    var item = S.items[S.i];
+    S.rounds.push({ name: item.name, expected: S.expected, actual: actual });
+    $("resultIcon").innerHTML = icon(item.name);
+    $("resultTitle").textContent = "كان " + item.name;
+    $("resultGap").textContent = gapText(S.expected, actual);
+    $("resultCompare").innerHTML =
+      "<div><small>قبل اللمس</small>" + face(S.expected) + "<b>" + LBL_E[S.expected] + "</b></div>" +
+      "<div><small>بعد اللمس</small>" + face(actual) + "<b>" + LBL_A[actual] + "</b></div>";
+    $("resultCompare").hidden = false;
+    $("resultLesson").textContent = item.lesson;
+    $("btnNext").textContent = nextLabel();
+    show("s-result");
+  }
+  function showSkipped() {
+    var item = S.items[S.i];
+    S.rounds.push({ name: item.name, skipped: true });
+    $("resultIcon").innerHTML = "";
+    $("resultTitle").textContent = "لا بأس، تخطّينا";
+    $("resultGap").textContent = "هذا اختيارك، وهو جيد.";
+    $("resultCompare").hidden = true;
+    $("resultLesson").textContent = "أنتِ تعرفين ما يناسبك. نجرّب شيئاً آخر.";
+    $("btnNext").textContent = nextLabel();
+    show("s-result");
+  }
+
+  function showEnd() {
+    var fear = S.rounds.filter(function (r) { return !r.skipped && r.expected > r.actual; }).length;
+    var st = "";
+    for (var k = 0; k < Math.min(S.stars, 12); k++) st += "★";
+    $("endStars").textContent = st;
+    $("endStarsText").textContent = "جمعتِ " + fmt(S.stars) + (S.stars === 1 ? " نجمة." : " نجوم.");
+    $("endMessage").textContent = fear >= 1
+      ? "الخوف كان أكبر من الحقيقة. كل مرة نجرّب، يصير الخوف أصغر."
+      : "جرّبتِ وأنتِ تعرفين نفسك. هذا جميل. كل تجربة تعلّمنا شيئاً.";
+    var html = "";
+    S.rounds.forEach(function (r) {
+      html += '<div class="round-row">' + icon(r.name) + "<div><b>" + r.name + "</b><span>" +
+        (r.skipped ? "تخطيتِها" : LBL_E[r.expected] + " ← " + LBL_A[r.actual]) + "</span></div></div>";
+    });
+    $("endRounds").innerHTML = html;
+    show("s-end");
+  }
+
+  buildScale("scaleExpect", LBL_E, function (n) { S.expected = n; stats(); show("s-reach"); });
+  buildScale("scaleActual", LBL_A, function (n) { showResult(n); });
+
+  $("btnStart").addEventListener("click", newGame);
+  $("btnAgain").addEventListener("click", newGame);
+  $("btnSkip").addEventListener("click", showSkipped);
+  $("btnReach").addEventListener("click", function () {
+    if (S.reaching) return;
+    S.reaching = true;
+    $("lid").classList.add("open");
+    setTimeout(reachDone, 700);
+  });
+  $("btnClue").addEventListener("click", function () {
+    if (S.answered) return;
+    var item = S.items[S.i];
+    S.clues = Math.min(S.clues + 1, item.clues.length);
+    renderClues();
+    say(item.clues[S.clues - 1]);
+  });
+  $("btnAfterGuess").addEventListener("click", function () { show("s-actual"); });
+  $("btnNext").addEventListener("click", function () {
+    if (S.i === ROUNDS - 1) { S.i++; stats(); showEnd(); return; }
+    S.i++; startRound();
+  });
+  $("btnSize").addEventListener("click", function () {
+    var on = $("wrap").classList.toggle("big");
+    this.setAttribute("aria-pressed", on ? "true" : "false");
+    this.textContent = on ? "خط عادي" : "تكبير الخط";
+  });
+  $("btnSound").addEventListener("click", function () {
+    soundOn = !soundOn;
+    this.setAttribute("aria-pressed", soundOn ? "true" : "false");
+    this.textContent = soundOn ? "الصوت: يعمل" : "الصوت: متوقف";
+    if (!soundOn && synth) { try { synth.cancel(); } catch (e) {} }
+  });
+  $("btnReplay").addEventListener("click", function () { speak(lastText || visibleText(cur), true); });
+
+  S = { i: 0, stars: 0 };
+  show("s-start");
+})();
+</script>
+
+</body></html>
